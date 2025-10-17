@@ -1,4 +1,4 @@
-import { ecoTips } from '../constants.tsx';
+import { api } from '../api.ts';
 import Card from '../components/Card.tsx';
 
 // FIX: Declare global Vue object provided by a script tag.
@@ -7,21 +7,29 @@ declare var Vue: any;
 export default {
   components: { Card },
   setup() {
-    const { ref, computed } = Vue;
+    const { ref, computed, onMounted } = Vue;
     const categories = ['All', 'Recycling', 'Energy', 'Water', 'Lifestyle'];
     const selectedCategory = ref('All');
+    const ecoTips = ref([]);
+    const isLoading = ref(true);
+
+    onMounted(async () => {
+        ecoTips.value = await api.getEcoTips();
+        isLoading.value = false;
+    });
 
     const filteredTips = computed(() => {
         if (selectedCategory.value === 'All') {
-            return ecoTips;
+            return ecoTips.value;
         }
-        return ecoTips.filter(tip => tip.category === selectedCategory.value);
+        return ecoTips.value.filter(tip => tip.category === selectedCategory.value);
     });
 
     return { 
         categories,
         selectedCategory,
-        filteredTips
+        filteredTips,
+        isLoading
     };
   },
   template: `
@@ -41,9 +49,11 @@ export default {
                 {{ category }}
             </button>
         </div>
+        
+        <div v-if="isLoading" class="text-center text-gray-500 text-lg">Cargando consejos...</div>
 
         <!-- Tips Grid -->
-        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div v-else class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
              <div v-for="(tip, index) in filteredTips" :key="tip.id" class="animate-slide-in-up" :style="{ animationDelay: (index * 50 + 200) + 'ms' }">
                 <card class-name="flex flex-col h-full !p-0">
                     <div class="p-6">

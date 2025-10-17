@@ -1,4 +1,5 @@
-import { challenges, QuizIcon, GameIcon, SimIcon } from '../constants.tsx';
+import { api } from '../api.ts';
+import { QuizIcon, GameIcon, SimIcon } from '../constants.tsx';
 import Card from '../components/Card.tsx';
 import ChallengeModal from '../components/ChallengeModal.tsx';
 
@@ -21,10 +22,17 @@ export default {
   },
   emits: ['complete-challenge'],
   setup(props, { emit }) {
-    const { ref } = Vue;
+    const { ref, onMounted } = Vue;
 
+    const challenges = ref([]);
+    const isLoading = ref(true);
     const selectedChallenge = ref(null);
     const isModalVisible = ref(false);
+    
+    onMounted(async () => {
+        challenges.value = await api.getChallenges();
+        isLoading.value = false;
+    });
 
     const openChallengeModal = (challenge) => {
       if (props.user.completedChallenges.includes(challenge.id)) return;
@@ -44,6 +52,7 @@ export default {
 
     return {
       challenges,
+      isLoading,
       selectedChallenge,
       isModalVisible,
       openChallengeModal,
@@ -57,7 +66,10 @@ export default {
         <h1 class="text-4xl font-bold text-eco-green-dark">Misiones y Retos</h1>
         <p class="text-lg text-gray-600 mt-2">¡Completa retos para ganar puntos y subir de nivel!</p>
       </div>
-      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+      <div v-if="isLoading" class="text-center text-gray-500 text-lg">Cargando retos... 🌍</div>
+
+      <div v-else class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
         <div v-for="(challenge, index) in challenges" :key="challenge.id" class="animate-slide-in-up" :style="{ animationDelay: (index * 100) + 'ms' }">
           <card class-name="flex flex-col h-full">
             <div class="flex items-center space-x-4 mb-4">

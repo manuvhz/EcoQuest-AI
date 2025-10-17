@@ -1,4 +1,4 @@
-import { achievements } from '../constants.tsx';
+import { api } from '../api.ts';
 import Card from '../components/Card.tsx';
 import ProgressBar from '../components/ProgressBar.tsx';
 
@@ -14,14 +14,24 @@ export default {
     },
   },
   setup(props) {
-    const { computed } = Vue;
+    const { ref, computed, onMounted } = Vue;
+    
+    const allAchievements = ref([]);
+    const isLoading = ref(true);
+
+    onMounted(async () => {
+        allAchievements.value = await api.getAchievements();
+        isLoading.value = false;
+    });
+
     const userAchievements = computed(() => 
-      achievements.filter(ach => props.user.unlockedAchievements.includes(ach.id))
+      allAchievements.value.filter(ach => props.user.unlockedAchievements.includes(ach.id))
     );
     const lockedAchievements = computed(() => 
-      achievements.filter(ach => !props.user.unlockedAchievements.includes(ach.id))
+      allAchievements.value.filter(ach => !props.user.unlockedAchievements.includes(ach.id))
     );
-    return { userAchievements, lockedAchievements };
+    
+    return { userAchievements, lockedAchievements, isLoading };
   },
   template: `
     <div class="space-y-8 animate-fade-in">
@@ -61,7 +71,8 @@ export default {
       
       <!-- Achievements -->
       <card title="Logros Desbloqueados 🏅" class-name="animate-slide-in-up" :style="{ animationDelay: '400ms' }">
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+        <div v-if="isLoading" class="text-center text-gray-500">Cargando logros...</div>
+        <div v-else class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
           <div v-for="ach in userAchievements" :key="ach.id" class="flex flex-col items-center text-center p-2 rounded-lg bg-eco-green-light" :title="ach.description">
             <div class="text-4xl" v-html="ach.icon"></div>
             <p class="text-sm font-semibold text-eco-green-dark mt-1">{{ ach.name }}</p>

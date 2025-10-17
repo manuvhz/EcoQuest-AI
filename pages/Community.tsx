@@ -1,10 +1,22 @@
-// FIX: Created the Community page component with mock data.
-import { friendsData } from '../constants.tsx';
+import { api } from '../api.ts';
 import Card from '../components/Card.tsx';
+
+// FIX: Declare global Vue object provided by a script tag.
+declare var Vue: any;
 
 export default {
     components: { Card },
     setup() {
+        const { ref, onMounted } = Vue;
+
+        const friendsData = ref([]);
+        const isLoadingFriends = ref(true);
+
+        onMounted(async () => {
+            friendsData.value = await api.getFriends();
+            isLoadingFriends.value = false;
+        });
+        
         const activities = [
             { id: 1, user: 'Elena Verde', action: 'ha superado tu puntuación en el reto "Quiz: El Plástico"!', time: 'hace 5 min' },
             { id: 2, user: 'Pedro Monte', action: 'ha alcanzado el Nivel 13.', time: 'hace 1 hora' },
@@ -14,6 +26,7 @@ export default {
 
         return {
             friendsData,
+            isLoadingFriends,
             activities
         };
     },
@@ -26,7 +39,8 @@ export default {
 
       <!-- Friends List -->
       <card title="Mis Amigos" class-name="animate-slide-in-up" :style="{ animationDelay: '100ms' }">
-        <div class="space-y-4">
+        <div v-if="isLoadingFriends" class="text-center text-gray-500">Cargando amigos...</div>
+        <div v-else class="space-y-4">
           <div v-for="friend in friendsData" :key="friend.id" class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
             <div class="flex items-center space-x-4">
               <div class="relative">

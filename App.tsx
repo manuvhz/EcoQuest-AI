@@ -3,6 +3,7 @@
 declare var Vue: any;
 
 import type { User } from './types.ts';
+import { api } from './api.ts';
 
 // Import all components
 import Navbar from './components/Navbar.tsx';
@@ -34,21 +35,10 @@ export default {
   setup() {
     const { ref, computed, onMounted, onUnmounted } = Vue;
 
-    const defaultUser: User = {
-      id: 'u1',
-      name: 'EcoGuerrero',
-      avatarUrl: 'https://i.pravatar.cc/150?u=a042581f4e29026704f',
-      points: 10500,
-      level: 12,
-      pointsToNextLevel: 15000,
-      unlockedAchievements: ['a1', 'a2', 'a4', 'a5'],
-      completedChallenges: ['c1'],
-      friendIds: ['u2', 'u3', 'u4'],
-    };
-
     // State
     const isAuthenticated = ref(false);
-    const user = ref<User | null>(null);
+    // FIX: Use type assertion on the value passed to `ref` to avoid providing a type argument to an untyped function.
+    const user = ref(null as User | null);
     const currentPath = ref(window.location.hash.slice(1) || 'login');
     const toasts = ref([]);
     let toastId = 0;
@@ -85,12 +75,18 @@ export default {
     };
 
     // Methods
-    const handleLogin = () => {
-      user.value = { ...defaultUser };
-      isAuthenticated.value = true;
-      window.location.hash = '#profile';
-      handleHashChange();
-      addToast('¡Bienvenido de nuevo, EcoGuerrero!');
+    const handleLogin = async () => {
+      try {
+        const userData = await api.login('demo@ecoquest.com', 'password');
+        user.value = userData;
+        isAuthenticated.value = true;
+        window.location.hash = '#profile';
+        handleHashChange();
+        addToast(`¡Bienvenido de nuevo, ${user.value.name}!`);
+      } catch (error) {
+        console.error("Login failed:", error);
+        addToast("Hubo un error al iniciar sesión.", "error");
+      }
     };
 
     const handleLogout = () => {

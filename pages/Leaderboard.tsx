@@ -1,4 +1,7 @@
-import { leaderboardData } from '../constants.tsx';
+import { api } from '../api.ts';
+
+// FIX: Declare global Vue object provided by a script tag.
+declare var Vue: any;
 
 export default {
   props: {
@@ -8,8 +11,18 @@ export default {
     },
   },
   setup() {
+    const { ref, onMounted } = Vue;
+    const leaderboardData = ref([]);
+    const isLoading = ref(true);
+
+    onMounted(async () => {
+        leaderboardData.value = await api.getLeaderboard();
+        isLoading.value = false;
+    });
+
     return {
       leaderboardData,
+      isLoading,
     };
   },
   template: `
@@ -20,7 +33,8 @@ export default {
       </div>
       
       <div class="bg-white rounded-xl shadow-lg overflow-hidden animate-slide-in-up" :style="{ animationDelay: '100ms' }">
-        <ul class="divide-y divide-gray-200">
+        <div v-if="isLoading" class="p-8 text-center text-gray-500">Cargando ranking...</div>
+        <ul v-else class="divide-y divide-gray-200">
           <li v-for="(user, index) in leaderboardData" 
               :key="user.id"
               :class="[
