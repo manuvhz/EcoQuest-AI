@@ -6,6 +6,7 @@ declare var Vue: any;
 
 export default {
     components: { Card },
+    emits: ['view-profile', 'remove-friend'],
     setup() {
         const { ref, onMounted } = Vue;
 
@@ -52,7 +53,10 @@ export default {
                 <p class="text-sm text-gray-500">{{ friend.lastActivity }}</p>
               </div>
             </div>
-            <button class="px-3 py-1 text-sm font-semibold text-eco-green border border-eco-green rounded-full hover:bg-eco-green-light transition-colors">Ver Perfil</button>
+            <div class="flex space-x-2">
+                <button @click="$emit('view-profile', friend.id)" class="px-3 py-1 text-sm font-semibold text-eco-green border border-eco-green rounded-full hover:bg-eco-green-light transition-colors">Ver Perfil</button>
+                <button @click="$emit('remove-friend', friend.id)" class="px-3 py-1 text-sm font-semibold text-red-500 border border-red-500 rounded-full hover:bg-red-100 transition-colors">Eliminar</button>
+            </div>
           </div>
         </div>
       </card>

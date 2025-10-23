@@ -1,10 +1,5 @@
 import { Router } from 'express';
-import { users } from '../models/userModel';
-import { achievements } from '../models/achievementModel';
-import { challenges } from '../models/challengeModel';
-import { ecoTips } from '../models/ecoTipModel';
-import { friendsData } from '../models/friendModel';
-import { leaderboardData } from '../models/leaderboardModel';
+import { db } from '../db';
 
 const router = Router();
 
@@ -13,16 +8,11 @@ router.get('/status', (req, res) => {
   res.json({ message: "EcoQuest API funcionando 🌿" });
 });
 
-// /api/users
-router.get('/users', (req, res) => {
-  res.json(users);
-});
-
 // App data routes
-router.get('/challenges', (req, res) => res.json(challenges));
-router.get('/leaderboard', (req, res) => res.json(leaderboardData));
-router.get('/friends', (req, res) => res.json(friendsData));
-router.get('/achievements', (req, res) => res.json(achievements));
-router.get('/ecotips', (req, res) => res.json(ecoTips));
+router.get('/challenges', (req, res) => res.json(db.challenges));
+router.get('/leaderboard', (req, res) => res.json(db.leaderboardData));
+router.get('/friends', (req, res) => res.json(db.friendsData));
+router.get('/achievements', (req, res) => res.json(db.achievements));
+router.get('/ecotips', (req, res) => res.json(db.ecoTips));
 
 export default router;

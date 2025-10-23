@@ -11,7 +11,8 @@ export default {
             required: true,
         },
     },
-    setup(props) {
+    emits: ['save-settings'],
+    setup(props, { emit }) {
         const { ref } = Vue;
         // Create local refs for form fields to avoid directly mutating props
         const form = ref({
@@ -26,10 +27,10 @@ export default {
         });
 
         const saveChanges = () => {
-            // In a real app, you would emit an event or call an API
-            console.log('Saving changes:', form.value, notifications.value);
-            // Here you could show a toast message
-            alert('¡Cambios guardados! (Simulación)');
+            emit('save-settings', { 
+                profile: form.value, 
+                notifications: notifications.value 
+            });
         };
 
         return {

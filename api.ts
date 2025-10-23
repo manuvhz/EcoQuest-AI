@@ -25,6 +25,35 @@ export const api = {
     return handleResponse<User>(response);
   },
 
+  async saveSettings(settingsData: { profile: { name: string; avatarUrl: string }; notifications: any }): Promise<User> {
+    const response = await fetch(`${API_BASE_URL}/user`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(settingsData),
+    });
+    return handleResponse<User>(response);
+  },
+
+  async removeFriend(friendId: string): Promise<User> {
+    const response = await fetch(`${API_BASE_URL}/friends/${friendId}`, {
+        method: 'DELETE',
+    });
+    return handleResponse<User>(response);
+  },
+
+  async completeChallenge(challengeData: { challengeId: string; points: number }): Promise<{ user: User, notifications: string[] }> {
+    const response = await fetch(`${API_BASE_URL}/user/challenge`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(challengeData),
+    });
+    return handleResponse<{ user: User, notifications: string[] }>(response);
+  },
+
   async getChallenges(): Promise<Challenge[]> {
     const response = await fetch(`${API_BASE_URL}/challenges`);
     return handleResponse<Challenge[]>(response);

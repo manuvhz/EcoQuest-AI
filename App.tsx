@@ -96,25 +96,43 @@ export default {
       handleHashChange();
     };
 
-    const handleCompleteChallenge = ({ challengeId, points }) => {
+    const handleCompleteChallenge = async ({ challengeId, points }) => {
         if (!user.value || user.value.completedChallenges.includes(challengeId)) return;
-
-        user.value.completedChallenges.push(challengeId);
-        user.value.points += points;
-
-        // Simple level up logic
-        if (user.value.points >= user.value.pointsToNextLevel) {
-            user.value.level++;
-            user.value.pointsToNextLevel = Math.floor(user.value.pointsToNextLevel * 1.5);
-            addToast(`¡Felicidades! ¡Has subido al Nivel ${user.value.level}!`, 'success');
-        } else {
-             addToast(`¡Reto completado! Has ganado ${points} puntos.`, 'success');
-        }
         
-        // Check for new achievements
-        if (user.value.completedChallenges.length >= 10 && !user.value.unlockedAchievements.includes('a6')) {
-            user.value.unlockedAchievements.push('a6');
-            addToast('¡Logro desbloqueado: Campeón de Retos! 🏆', 'success');
+        try {
+            const result = await api.completeChallenge({ challengeId, points });
+            user.value = result.user; // Update user with state from server
+            // The server sends back specific notifications based on the outcome
+            result.notifications.forEach(notification => {
+                // We show the first one as primary, and others might appear if logic allows
+                // For now, let's show all of them.
+                addToast(notification, 'success');
+            });
+        } catch (error) {
+            console.error("Failed to complete challenge:", error);
+            addToast("Hubo un error al completar el reto.", "error");
+        }
+    };
+    
+    const handleSaveSettings = async (settingsData) => {
+        try {
+            const updatedUser = await api.saveSettings(settingsData);
+            user.value = updatedUser;
+            addToast('¡Ajustes guardados con éxito!');
+        } catch (error) {
+            console.error("Failed to save settings:", error);
+            addToast('Hubo un error al guardar los ajustes.', 'error');
+        }
+    };
+    
+    const handleRemoveFriend = async (friendId: string) => {
+        try {
+            const updatedUser = await api.removeFriend(friendId);
+            user.value = updatedUser;
+            addToast('Amigo eliminado con éxito.');
+        } catch (error) {
+            console.error("Failed to remove friend:", error);
+            addToast('Hubo un error al eliminar al amigo.', 'error');
         }
     };
 
@@ -138,6 +156,8 @@ export default {
       handleLogin,
       handleLogout,
       handleCompleteChallenge,
+      handleSaveSettings,
+      handleRemoveFriend,
       removeToast,
     };
   },
@@ -158,6 +178,8 @@ export default {
                 :current-user="user"
                 @login="handleLogin"
                 @complete-challenge="handleCompleteChallenge"
+                @save-settings="handleSaveSettings"
+                @remove-friend="handleRemoveFriend"
             />
              <component 
                 :is="currentPageComponent" 
