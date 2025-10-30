@@ -162,33 +162,35 @@ export default {
     };
   },
   template: `
-    <div class="bg-gray-50 min-h-screen font-sans text-gray-800">
-        <navbar 
-            v-if="isAuthenticated && user" 
-            :current-page="currentPath" 
-            :user="user"
-            @logout="handleLogout"
+    <div class="font-sans">
+        <!-- Authenticated View -->
+        <div v-if="isAuthenticated && user" class="bg-eco-bg min-h-screen text-eco-text">
+            <navbar 
+                :current-page="currentPath" 
+                :user="user"
+                @logout="handleLogout"
+            />
+            
+            <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <component 
+                    :is="currentPageComponent" 
+                    :user="user"
+                    :current-user="user"
+                    @complete-challenge="handleCompleteChallenge"
+                    @save-settings="handleSaveSettings"
+                    @remove-friend="handleRemoveFriend"
+                />
+            </main>
+        </div>
+
+        <!-- Unauthenticated View (Login Page) -->
+        <component 
+            v-else
+            :is="currentPageComponent" 
+            @login="handleLogin"
         />
         
-        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <component 
-                :is="currentPageComponent" 
-                v-if="user"
-                :user="user"
-                :current-user="user"
-                @login="handleLogin"
-                @complete-challenge="handleCompleteChallenge"
-                @save-settings="handleSaveSettings"
-                @remove-friend="handleRemoveFriend"
-            />
-             <component 
-                :is="currentPageComponent" 
-                v-else
-                @login="handleLogin"
-            />
-        </main>
-        
-        <!-- Toast Container -->
+        <!-- Toast Container (Global) -->
         <div class="fixed bottom-5 right-5 w-full max-w-xs space-y-3 z-[100]">
             <transition-group
                 name="toast-fade"
