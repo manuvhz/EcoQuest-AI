@@ -1,4 +1,4 @@
-import { api } from '../api.ts';
+import { leaderboardData, isLoadingLeaderboard, fetchLeaderboard } from '../store/leaderboard.ts';
 
 // FIX: Declare global Vue object provided by a script tag.
 declare var Vue: any;
@@ -11,18 +11,15 @@ export default {
     },
   },
   setup() {
-    const { ref, onMounted } = Vue;
-    const leaderboardData = ref([]);
-    const isLoading = ref(true);
+    const { onMounted } = Vue;
 
-    onMounted(async () => {
-        leaderboardData.value = await api.getLeaderboard();
-        isLoading.value = false;
+    onMounted(() => {
+        fetchLeaderboard();
     });
 
     return {
       leaderboardData,
-      isLoading,
+      isLoading: isLoadingLeaderboard,
     };
   },
   template: `

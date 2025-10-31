@@ -22,18 +22,24 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
-// FIX: Using express.json() without an explicit path resolves the TypeScript overload issue.
+// FIX: Apply express.json() middleware at the app level to handle JSON payloads.
+// This resolves the TypeScript overload issue that was occurring with router.use().
 app.use(express.json());
 
-// API Routes
-app.use('/api', getRoutes);
-app.use('/api', postRoutes);
-app.use('/api', putRoutes);
-app.use('/api', deleteRoutes);
-app.use('/api', getChallengeRoutes);
-app.use('/api', getAchievementRoutes);
-app.use('/api', getEcoTipRoutes);
-app.use('/api', getUserRoutes);
+const apiRouter = express.Router();
+
+// Register all API routes on the apiRouter.
+apiRouter.use(getRoutes);
+apiRouter.use(postRoutes);
+apiRouter.use(putRoutes);
+apiRouter.use(deleteRoutes);
+apiRouter.use(getChallengeRoutes);
+apiRouter.use(getAchievementRoutes);
+apiRouter.use(getEcoTipRoutes);
+apiRouter.use(getUserRoutes);
+
+// Mount the single API router.
+app.use('/api', apiRouter);
 
 app.listen(port, () => {
   console.log(`Servidor EcoQuest funcionando en http://localhost:${port} 🌱`);

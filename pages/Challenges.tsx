@@ -1,4 +1,4 @@
-import { api } from '../api.ts';
+import { challenges, isLoadingChallenges, fetchChallenges } from '../store/challenges.ts';
 import { QuizIcon, GameIcon, SimIcon } from '../constants.tsx';
 import Card from '../components/Card.tsx';
 import ChallengeModal from '../components/ChallengeModal.tsx';
@@ -24,14 +24,11 @@ export default {
   setup(props, { emit }) {
     const { ref, onMounted } = Vue;
 
-    const challenges = ref([]);
-    const isLoading = ref(true);
     const selectedChallenge = ref(null);
     const isModalVisible = ref(false);
     
-    onMounted(async () => {
-        challenges.value = await api.getChallenges();
-        isLoading.value = false;
+    onMounted(() => {
+        fetchChallenges();
     });
 
     const openChallengeModal = (challenge) => {
@@ -52,7 +49,7 @@ export default {
 
     return {
       challenges,
-      isLoading,
+      isLoading: isLoadingChallenges,
       selectedChallenge,
       isModalVisible,
       openChallengeModal,

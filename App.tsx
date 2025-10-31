@@ -4,6 +4,9 @@ declare var Vue: any;
 
 import type { User } from './types.ts';
 import { api } from './api.ts';
+import { fetchChallenges } from './store/challenges.ts';
+import { fetchAchievements } from './store/achievements.ts';
+import { fetchFriends } from './store/friends.ts';
 
 // Import all components
 import Navbar from './components/Navbar.tsx';
@@ -33,7 +36,7 @@ export default {
     Settings,
   },
   setup() {
-    const { ref, computed, onMounted, onUnmounted } = Vue;
+    const { ref, computed, onMounted, onUnmounted, watch } = Vue;
 
     // State
     const isAuthenticated = ref(false);
@@ -42,6 +45,15 @@ export default {
     const currentPath = ref(window.location.hash.slice(1) || 'login');
     const toasts = ref([]);
     let toastId = 0;
+    
+    // Watch for login/logout to pre-fetch data
+    watch(isAuthenticated, (isAuth) => {
+        if (isAuth) {
+            // Pre-fetch data that is used across multiple pages
+            fetchChallenges();
+            fetchAchievements();
+        }
+    });
 
     // Computed property to render the current page
     const currentPageComponent = computed(() => {
@@ -108,6 +120,8 @@ export default {
                 // For now, let's show all of them.
                 addToast(notification, 'success');
             });
+            // Force a refresh of achievements data in the store
+            fetchAchievements(true);
         } catch (error) {
             console.error("Failed to complete challenge:", error);
             addToast("Hubo un error al completar el reto.", "error");
@@ -129,6 +143,7 @@ export default {
         try {
             const updatedUser = await api.removeFriend(friendId);
             user.value = updatedUser;
+            fetchFriends(true); // Force refresh friends list in the store
             addToast('Amigo eliminado con éxito.');
         } catch (error) {
             console.error("Failed to remove friend:", error);

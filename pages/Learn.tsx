@@ -1,4 +1,4 @@
-import { api } from '../api.ts';
+import { ecoTips, isLoadingEcoTips, fetchEcoTips } from '../store/ecoTips.ts';
 import Card from '../components/Card.tsx';
 
 // FIX: Declare global Vue object provided by a script tag.
@@ -10,12 +10,9 @@ export default {
     const { ref, computed, onMounted } = Vue;
     const categories = ['All', 'Recycling', 'Energy', 'Water', 'Lifestyle'];
     const selectedCategory = ref('All');
-    const ecoTips = ref([]);
-    const isLoading = ref(true);
 
-    onMounted(async () => {
-        ecoTips.value = await api.getEcoTips();
-        isLoading.value = false;
+    onMounted(() => {
+        fetchEcoTips();
     });
 
     const filteredTips = computed(() => {
@@ -29,7 +26,7 @@ export default {
         categories,
         selectedCategory,
         filteredTips,
-        isLoading
+        isLoading: isLoadingEcoTips
     };
   },
   template: `

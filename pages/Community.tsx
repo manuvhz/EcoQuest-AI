@@ -1,4 +1,4 @@
-import { api } from '../api.ts';
+import { friendsData, isLoadingFriends, fetchFriends } from '../store/friends.ts';
 import Card from '../components/Card.tsx';
 
 // FIX: Declare global Vue object provided by a script tag.
@@ -8,14 +8,10 @@ export default {
     components: { Card },
     emits: ['view-profile', 'remove-friend'],
     setup() {
-        const { ref, onMounted } = Vue;
+        const { onMounted } = Vue;
 
-        const friendsData = ref([]);
-        const isLoadingFriends = ref(true);
-
-        onMounted(async () => {
-            friendsData.value = await api.getFriends();
-            isLoadingFriends.value = false;
+        onMounted(() => {
+            fetchFriends();
         });
         
         const activities = [

@@ -1,4 +1,4 @@
-import { api } from '../api.ts';
+import { achievements as allAchievements, isLoadingAchievements, fetchAchievements } from '../store/achievements.ts';
 import Card from '../components/Card.tsx';
 import ProgressBar from '../components/ProgressBar.tsx';
 
@@ -14,13 +14,10 @@ export default {
     },
   },
   setup(props) {
-    const { ref, computed, onMounted } = Vue;
-    const allAchievements = ref([]);
-    const isLoading = ref(true);
+    const { computed, onMounted } = Vue;
 
-    onMounted(async () => {
-        allAchievements.value = await api.getAchievements();
-        isLoading.value = false;
+    onMounted(() => {
+        fetchAchievements();
     });
 
     const processedAchievements = computed(() => 
@@ -45,7 +42,11 @@ export default {
     const unlocked = computed(() => processedAchievements.value.filter(a => a.isUnlocked));
     const locked = computed(() => processedAchievements.value.filter(a => !a.isUnlocked));
 
-    return { unlocked, locked, isLoading };
+    return { 
+        unlocked, 
+        locked, 
+        isLoading: isLoadingAchievements
+    };
   },
   template: `
     <div class="space-y-8 animate-fade-in">
